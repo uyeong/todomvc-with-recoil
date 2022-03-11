@@ -1,12 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+import { RecoilRoot, useRecoilSnapshot } from 'recoil';
 import reportWebVitals from './reportWebVitals';
+import App from './App';
+import './index.css';
+
+function DebugObserver() {
+  const snapshot = useRecoilSnapshot();
+  useEffect(() => {
+    console.debug('The following atoms were modified:');
+    // @ts-ignore
+    for (const node of snapshot.getNodes_UNSTABLE({ isModified: true })) {
+      console.debug(node.key, snapshot.getLoadable(node));
+    }
+  }, [snapshot]);
+  return null;
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <RecoilRoot>
+      <DebugObserver />
+      <App/>
+    </RecoilRoot>
   </React.StrictMode>,
   document.getElementById('root')
 );
