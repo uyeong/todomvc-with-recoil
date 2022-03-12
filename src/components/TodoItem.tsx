@@ -1,17 +1,16 @@
 import React, { memo, useEffect, useRef, useState, KeyboardEvent } from 'react';
 import { useEventCallback } from '@restart/hooks';
 import cc from 'classcat';
+import { useTodoItem } from '../hooks';
 
 interface Props {
   id: string;
   title: string;
   completed: boolean;
-  onChangeTitle?: (id: string, title: string) => void;
-  onChangeCompleted?: (id: string, completed: boolean) => void;
-  onRemove?: (id: string,) => void;
 }
 
-const TodoItem = ({ id, title, completed, onChangeTitle, onChangeCompleted, onRemove }: Props) => {
+const TodoItem = ({ id, title, completed }: Props) => {
+  const { setTitle, setCompleted, remove } = useTodoItem(id);
   const editInputRef = useRef<HTMLInputElement>(null);
   const [editable, setEditable] = useState(false);
   const handleDoubleClick = useEventCallback(() => {
@@ -19,7 +18,7 @@ const TodoItem = ({ id, title, completed, onChangeTitle, onChangeCompleted, onRe
   });
   const handleChangeTitle = useEventCallback(() => {
     const value = editInputRef.current!.value.trim();
-    onChangeTitle?.(id, value);
+    setTitle(value);
   });
   const handleKeyDown = useEventCallback((event: KeyboardEvent<HTMLInputElement>) => {
     if (event.code === 'Escape') {
@@ -30,19 +29,19 @@ const TodoItem = ({ id, title, completed, onChangeTitle, onChangeCompleted, onRe
     }
   });
   const handleChangeCompleted = useEventCallback(() => {
-    onChangeCompleted?.(id, !completed);
+    setCompleted(!completed);
   });
   const handleSubmit = useEventCallback(() => {
     const value = editInputRef.current!.value.trim();
     if (value) {
-      onChangeTitle?.(id, value);
+      setTitle(value);
     } else {
-      onRemove?.(id);
+      remove();
     }
     setEditable(false);
   });
   const handleRemove = useEventCallback(() => {
-    onRemove?.(id);
+    remove();
   });
   useEffect(() => {
     editInputRef.current![editable ? 'focus' : 'blur']();
@@ -59,7 +58,7 @@ const TodoItem = ({ id, title, completed, onChangeTitle, onChangeCompleted, onRe
         <label onDoubleClick={handleDoubleClick}>
           {title}
         </label>
-        <button className="destroy" onClick={handleRemove}/>
+        <button className="destroy" onClick={handleRemove} />
       </div>
       <input
         ref={editInputRef}

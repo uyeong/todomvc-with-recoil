@@ -1,11 +1,9 @@
 import React, { memo, KeyboardEvent } from 'react';
 import { useEventCallback } from '@restart/hooks';
+import { useTodoList } from '../hooks';
 
-interface Props {
-  onCreate?: (title: string) => void;
-}
-
-const Header = ({ onCreate }: Props) => {
+const Header = () => {
+  const { addTodo } = useTodoList();
   const handleKeyDown = useEventCallback((event: KeyboardEvent<HTMLInputElement>) => {
     if (event.code !== 'Enter') {
       return;
@@ -13,7 +11,7 @@ const Header = ({ onCreate }: Props) => {
     event.preventDefault();
     const value = event.currentTarget.value;
     if (value.trim() !== '') {
-      onCreate?.(value);
+      addTodo(value);
       event.currentTarget.value = '';
     }
   });
