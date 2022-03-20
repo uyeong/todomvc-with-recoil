@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useLayoutEffect } from 'react';
+import { useEventCallback } from '@restart/hooks';
 import cc from 'classcat';
 import { TodoFilter } from '../types';
 
@@ -6,10 +7,31 @@ interface Props {
   activeTodoFilter: TodoFilter,
   remaining: number;
   showClearButton?: boolean;
+  onChangeTodoFilter?: (todoFilter: TodoFilter) => void;
   onClearCompleted?: () => void;
 }
 
-const Footer = ({ activeTodoFilter, remaining, showClearButton, onClearCompleted }: Props) => {
+const Footer = ({
+  activeTodoFilter,
+  remaining,
+  showClearButton,
+  onChangeTodoFilter,
+  onClearCompleted
+}: Props) => {
+  const handlePopState = useEventCallback(() => {
+    const locationHash = document.location.hash;
+    const newTodoFilter = (locationHash.replace(/#\//g, '') || TodoFilter.All) as TodoFilter;
+    onChangeTodoFilter?.(newTodoFilter);
+  });
+  useLayoutEffect(() => {
+    handlePopState();
+  }, [handlePopState]);
+  useEffect(() => {
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [handlePopState]);
   return (
     <footer className="footer">
       <span className="todo-count">
